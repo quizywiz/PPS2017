@@ -1,8 +1,8 @@
 package scout.sim;
 
-import java.util.List;
+import java.util.Set;
 import java.util.Random;
 
 abstract public class EnemyMapper {
-    abstract public List<Point> getLocations(int n, int num, Random gen);
+    abstract public Set<Point> getLocations(int n, int num, Random gen);
 }

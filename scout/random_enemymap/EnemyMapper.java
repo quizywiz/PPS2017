@@ -2,15 +2,15 @@ package scout.random_enemymap;
 
 import scout.sim.Point;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Random;
 
 public class EnemyMapper extends scout.sim.EnemyMapper {
     @Override
-    public List<Point> getLocations(int n, int num, Random gen) {
-        List<Point> locations = new ArrayList<>();
-        for(int i = 0 ; i < num ; ++ i) {
+    public Set<Point> getLocations(int n, int num, Random gen) {
+        Set<Point> locations = new HashSet<>();
+        while(locations.size() < num) {
             locations.add(new Point((gen.nextInt(n)) + 1, (gen.nextInt(n)) + 1) );
         }
         return locations;

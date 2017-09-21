@@ -77,7 +77,8 @@ public class Simulator {
     grid.addAllCellObjects(landmarks, landmarkLocations);
 
     //add enemies according to enemymapper
-    List<Point> enemyLocations = enemyMapper.getLocations(n, e, new Random(seed + 1));
+    List<Point> enemyLocations = new ArrayList<>(
+      enemyMapper.getLocations(n, e, new Random(seed + 1)));
     if (enemyLocations.size() != e) throw new Exception("enemy mapper count not right");
     List<CellObject> enemies = new ArrayList<>();
     Random enemyIDGen = new Random(seed + 2);
