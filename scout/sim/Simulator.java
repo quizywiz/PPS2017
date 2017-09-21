@@ -224,6 +224,7 @@ public class Simulator {
             turns = 2;
             if(isDiag) turns  = 3;
             if(isNearEnemy) turns *= 3;
+            turns -= 2;
             turnsToWait.put(scout.getID(), turns);
           }
         }
@@ -237,6 +238,7 @@ public class Simulator {
             group, 
             n, 
             t, 
+            scouts,
             scoutLocations,
             enemyLocations,
             landmarkLocations,
@@ -551,6 +553,7 @@ public class Simulator {
     String group, 
     int n, 
     int turns_left, 
+    Player[] scouts,
     List<Point> scoutLocations,
     List<Point> enemyLocations,
     List<Point> landmarkLocations,
@@ -578,6 +581,10 @@ public class Simulator {
     for(Point p : landmarkLocations) {
       buffer += p.y + ",";
       buffer += p.x + ",";
+    }
+
+    for(Player scout : scouts) {
+      buffer += scout.getID().substring(1) + ",";
     }
     return buffer;
   }

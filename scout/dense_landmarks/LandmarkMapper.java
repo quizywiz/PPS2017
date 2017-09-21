@@ -9,6 +9,7 @@ import java.util.Random;
 public class LandmarkMapper extends scout.sim.LandmarkMapper {
     @Override
     public List<Point> getLocations(int n) {
+        // "Random"
         Random gen = new Random(222);
         List<Point> locations = new ArrayList<>();
         for(int i = 0 ; i < 4*n ; ++ i) {

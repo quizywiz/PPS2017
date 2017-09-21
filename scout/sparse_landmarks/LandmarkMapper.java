@@ -1,4 +1,4 @@
-package scout.dense_landmarks;
+package scout.sparse_landmarks;
 
 import scout.sim.Point;
 

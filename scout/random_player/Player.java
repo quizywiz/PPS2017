@@ -11,15 +11,17 @@ public class Player extends scout.sim.Player {
     int t,n;
     int x = -1;
     int y = -1;
+    int seed;
     public Player(int id) {
         super(id);
+        seed=id;
     }
 
     @Override
     public void init(String id, int s, int n, int t, List<Point> landmarkLocations) {
         enemyLocations = new ArrayList<>();
         safeLocations = new ArrayList<>();
-        gen = new Random(100);
+        gen = new Random(seed);
         this.t = t;
         this.n = n;
     }
