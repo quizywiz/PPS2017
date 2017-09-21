@@ -40,10 +40,11 @@ public class Grid {
         return new Point(x,y);
     }
 
-    public void addAllCellObjects(List<CellObject> cellObjects, List<Point> locations) {
+    public void addAllCellObjects(List<CellObject> cellObjects, List<Point> locations) throws Exception{
         for(int i = 0 ;i < cellObjects.size(); ++i) {
-            assert (locations.get(i).x >= 0 && locations.get(i).x <= size + 1
-                && locations.get(i).y >= 0 && locations.get(i).y <= size + 1);
+            if(!( (locations.get(i).x >= 0 && locations.get(i).x <= size + 1
+                && locations.get(i).y >= 0 && locations.get(i).y <= size + 1))) 
+                throw new Exception("cell object location out of bounds");
             //System.out.println(i +" "+ locations.get(i).x +" "+locations.get(i).y);
             this.getCell(locations.get(i)).add(cellObjects.get(i));
             this.location.put(cellObjects.get(i).getID(),locations.get(i));

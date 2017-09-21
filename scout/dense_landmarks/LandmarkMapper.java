@@ -11,7 +11,7 @@ public class LandmarkMapper extends scout.sim.LandmarkMapper {
     public List<Point> getLocations(int n) {
         Random gen = new Random(222);
         List<Point> locations = new ArrayList<>();
-        for(int i = 0 ; i < 10*n ; ++ i) {
+        for(int i = 0 ; i < 4*n ; ++ i) {
             locations.add(new Point((gen.nextInt(n)) + 1, (gen.nextInt(n)) + 1) );
         }
         return locations;

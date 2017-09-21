@@ -31,7 +31,7 @@ public class Player extends scout.sim.Player {
      */
     @Override
     public Point move(ArrayList<ArrayList<ArrayList<String>>> nearbyIds, List<CellObject> concurrentObjects) {
-        System.out.println("I'm at " + x + " " + y);
+        //System.out.println("I'm at " + x + " " + y);
         for(int i = 0 ; i < 3; ++ i) {
             for(int j = 0 ; j < 3 ; ++ j) {
                 boolean safe = true;
@@ -74,7 +74,7 @@ public class Player extends scout.sim.Player {
         }
 
         if(x!=-1) {
-            //move to NW outpost
+            //move to outpost with least x and y coordinate
             if (nearbyIds.get(0).get(0) != null) {
                 //move up and left
                 x -= 1;
@@ -82,14 +82,14 @@ public class Player extends scout.sim.Player {
                 return new Point(-1, -1);
             }
             if (nearbyIds.get(0).get(1) != null) {
-                //move up
-                y -= 1;
-                return new Point(0, -1);
-            }
-            if (nearbyIds.get(1).get(0) != null) {
-                //move left
+                //move down x
                 x -= 1;
                 return new Point(-1, 0);
+            }
+            if (nearbyIds.get(1).get(0) != null) {
+                //move down y
+                y -= 1;
+                return new Point(0, -1);
             }
             return new Point(0, 0);
         }

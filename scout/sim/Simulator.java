@@ -3,9 +3,11 @@ package scout.sim;
 import javax.tools.JavaCompiler;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.*;
 import java.util.*;
 
 public class Simulator {
@@ -16,7 +18,7 @@ public class Simulator {
   private static long gui_refresh;
   private static boolean gui_enabled, log;
 
-	public static void main(String[] args) throws IOException, ReflectiveOperationException {
+	public static void main(String[] args) throws Exception {
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
       System.out.println( System.getProperty( "java.home"));
       System.out.println(System.getProperty("user.dir"));
@@ -42,7 +44,23 @@ public class Simulator {
     System.out.println("score: " + new Simulator().play(n, t, s, e, scouts, landmarkMapper, enemyMapper, seed));
   }
 
-  private int play(int n, int t, int s, int e, Player[] scouts, LandmarkMapper landmarkMapper, EnemyMapper enemyMapper, Long seed) {
+  private int play(int n, int t, int s, int e, Player[] scouts, LandmarkMapper landmarkMapper, EnemyMapper enemyMapper, Long seed) throws Exception {
+    HTTPServer server = null;
+    if (gui_enabled) {
+      server = new HTTPServer();
+      if (!Desktop.isDesktopSupported())
+        System.err.println("Desktop operations not supported");
+      else if (!Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+        System.err.println("Desktop browse operation not supported");
+      else {
+        try {
+          Desktop.getDesktop().browse(new URI("http://localhost:" + server.port()));
+        } catch (URISyntaxException exc) {
+          exc.printStackTrace();
+        }
+      }
+    }
+
     Grid grid = new Grid(n);
     //add scouts randomly
     grid.addAllCellObjects(Arrays.asList(scouts), new ScoutMapper().getLocations(n, s, new Random(seed)));
@@ -54,12 +72,13 @@ public class Simulator {
     for(int i = 0 ; i < landmarkCount; ++i ) {
       landmarks.add(new Landmark(i, landmarkLocations.get(i).x, landmarkLocations.get(i).y));
     }
-    assert (landmarkCount == landmarkLocations.size());
+    if (landmarkCount != landmarkLocations.size()) throw new Exception("landmark mapper count not right");
+    //System.out.println(landmarkCount+ " AND " + landmarkLocations.size());
     grid.addAllCellObjects(landmarks, landmarkLocations);
 
     //add enemies according to enemymapper
     List<Point> enemyLocations = enemyMapper.getLocations(n, e, new Random(seed + 1));
-    assert (enemyLocations.size() == e);
+    if (enemyLocations.size() != e) throw new Exception("enemy mapper count not right");
     List<CellObject> enemies = new ArrayList<>();
     Random enemyIDGen = new Random(seed + 2);
     Set<Integer> enemyIDSet = new HashSet<>();
@@ -97,7 +116,9 @@ public class Simulator {
       turnsToWait.put(scout.getID(), -1);
     }
     while(t > 0) {
+      if(t%100 == 0)
       System.out.println("turn: " + t);
+
       for(Player scout: scouts) {
         if(turnsToWait.containsKey(scout.getID())) {
           int turns = turnsToWait.get(scout.getID());
@@ -134,7 +155,9 @@ public class Simulator {
         }
       }
 
+      List<Point> scoutLocations = new ArrayList<>();
       for(Player scout: scouts) {
+        scoutLocations.add(grid.location.get(scout.getID()));
         if (turnsToWait.containsKey(scout.getID())) {
           int turns = turnsToWait.get(scout.getID());
           if(turns >= 0) {
@@ -164,9 +187,17 @@ public class Simulator {
                 nearbyIDs.get(1 + x[i]).set(1 + y[i], null);
               }
             }
+            //System.out.println("actual: " + currentLocation.x + ", " + currentLocation.y);
+            // for(int i = 0; i < 3; ++i) {
+            //   for(int j = 0 ; j < 3; ++j) {
+            //     System.out.print(nearbyIDs.get(i).get(j) == null? "0":"1");
+            //   }
+            //   System.out.println();
+            // }
+            // System.out.println();
             Point direction = scout.move(nearbyIDs, grid.getCell(currentLocation));
 
-            assert(direction.x <= 1 && direction.x >= -1 && direction.y >=-1 && direction.y <= 1);
+            if(!(direction.x <= 1 && direction.x >= -1 && direction.y >=-1 && direction.y <= 1)) throw new Exception("move returned illegal value");
             Point next = grid.getLocationWithOffset(
                     currentLocation,
                     direction
@@ -197,80 +228,94 @@ public class Simulator {
           }
         }
       }
+
       --t;
+      if(gui_enabled)
+        gui(
+          server, 
+          state(
+            group, 
+            n, 
+            t, 
+            scoutLocations,
+            enemyLocations,
+            landmarkLocations,
+            gui_refresh
+          )
+        );
     }
 
     int score = 0;
 
-    for(int i = 0 ; i <= n + 1 ; ++ i) {
-      for (int j = 0; j <=n + 1; ++j) {
-        List<CellObject> objs = grid.getCell(i, j);
-        boolean hasEnemy = false;
-        for (CellObject obj : objs) {
-          if (obj instanceof Enemy) {
-            hasEnemy = true;
-          }
-        }
-        if(hasEnemy)
-          System.out.print("X");
-        else
-          System.out.print("0");
-      }
-      System.out.println();
-    }
-      System.out.println();
+    // for(int i = 0 ; i <= n + 1 ; ++ i) {
+    //   for (int j = 0; j <=n + 1; ++j) {
+    //     List<CellObject> objs = grid.getCell(i, j);
+    //     boolean hasEnemy = false;
+    //     for (CellObject obj : objs) {
+    //       if (obj instanceof Enemy) {
+    //         hasEnemy = true;
+    //       }
+    //     }
+    //     if(hasEnemy)
+    //       System.out.print("X");
+    //     else
+    //       System.out.print("0");
+    //   }
+    //   System.out.println();
+    // }
+    //   System.out.println();
 
-    for(int i = 0 ; i <= n + 1 ; ++ i) {
-      for (int j = 0; j <=n + 1; ++j) {
-        List<CellObject> objs = grid.getCell(i, j);
-        boolean hasEnemy = false;
-        for (CellObject obj : objs) {
-          if (obj instanceof Player) {
-            hasEnemy = true;
-          }
-        }
-        if(hasEnemy)
-          System.out.print("1");
-        else
-          System.out.print("0");
-      }
-      System.out.println();
-    }
-    System.out.println();
+    // for(int i = 0 ; i <= n + 1 ; ++ i) {
+    //   for (int j = 0; j <=n + 1; ++j) {
+    //     List<CellObject> objs = grid.getCell(i, j);
+    //     boolean hasEnemy = false;
+    //     for (CellObject obj : objs) {
+    //       if (obj instanceof Player) {
+    //         hasEnemy = true;
+    //       }
+    //     }
+    //     if(hasEnemy)
+    //       System.out.print("1");
+    //     else
+    //       System.out.print("0");
+    //   }
+    //   System.out.println();
+    // }
+    // System.out.println();
 
-    for(int i = 0 ; i <= n + 1 ; ++ i) {
-      for (int j = 0; j <=n + 1; ++j) {
-        List<CellObject> objs = grid.getCell(i, j);
-        boolean hasEnemy = false;
-        for (CellObject obj : objs) {
-          if (obj instanceof Landmark) {
-            hasEnemy = true;
-          }
-        }
-        if(hasEnemy)
-          System.out.print("]");
-        else
-          System.out.print("0");
-      }
-      System.out.println();
-    }
-    System.out.println();
+    // for(int i = 0 ; i <= n + 1 ; ++ i) {
+    //   for (int j = 0; j <=n + 1; ++j) {
+    //     List<CellObject> objs = grid.getCell(i, j);
+    //     boolean hasEnemy = false;
+    //     for (CellObject obj : objs) {
+    //       if (obj instanceof Landmark) {
+    //         hasEnemy = true;
+    //       }
+    //     }
+    //     if(hasEnemy)
+    //       System.out.print("]");
+    //     else
+    //       System.out.print("0");
+    //   }
+    //   System.out.println();
+    // }
+    // System.out.println();
 
-    for(CellObject _outpostobj : outposts) {
-      List<List<Integer>> outpostMap = ((Outpost) _outpostobj).getEnemyMap();
-      for(int i = 0 ; i <= n + 1 ; ++ i) {
-        for (int j = 0; j <=n + 1; ++j) {
-          int sss = outpostMap.get(i).get(j);
-          String xxx;
-          if(sss == 1) xxx = "X";
-          else if(sss == 2) xxx = "-";
-          else xxx = "0";
-          System.out.print(xxx);
-        }
-        System.out.println();
-      }
-      System.out.println();
-    }
+    // for(CellObject _outpostobj : outposts) {
+    //   List<List<Integer>> outpostMap = ((Outpost) _outpostobj).getEnemyMap();
+    //   for(int i = 0 ; i <= n + 1 ; ++ i) {
+    //     for (int j = 0; j <=n + 1; ++j) {
+    //       int sss = outpostMap.get(i).get(j);
+    //       String xxx;
+    //       if(sss == 1) xxx = "X";
+    //       else if(sss == 2) xxx = "-";
+    //       else xxx = "0";
+    //       System.out.print(xxx);
+    //     }
+    //     System.out.println();
+    //   }
+    //   System.out.println();
+    // }
     for(int i = 1 ; i < n + 1 ; ++ i) {
       for (int j = 1; j < n + 1; ++j) {
         List<CellObject> objs = grid.getCell(i, j);
@@ -500,5 +545,78 @@ public class Simulator {
       prev_dirs = next_dirs;
     } while (!prev_dirs.isEmpty());
     return files;
+  }
+
+  public static String state(
+    String group, 
+    int n, 
+    int turns_left, 
+    List<Point> scoutLocations,
+    List<Point> enemyLocations,
+    List<Point> landmarkLocations,
+    long gui_refresh) {
+
+    String buffer = "";
+    buffer += group + ",";
+    buffer += n + ",";
+    buffer += turns_left + ",";
+    buffer += gui_refresh + ",";
+  
+    buffer += scoutLocations.size() + ",";
+    for(Point p : scoutLocations) {
+      buffer += p.y + ",";
+      buffer += p.x + ",";
+    }
+    
+    buffer += enemyLocations.size() + ",";
+    for(Point p : enemyLocations) {
+      buffer += p.y + ",";
+      buffer += p.x + ",";
+    }
+
+    buffer += landmarkLocations.size() + ",";
+    for(Point p : landmarkLocations) {
+      buffer += p.y + ",";
+      buffer += p.x + ",";
+    }
+    return buffer;
+  }
+
+  public static void gui(HTTPServer server, String content) {
+    String path = null;
+    for (;;) {
+        // get request
+      for (;;)
+      try {
+        path = server.request();
+        break;
+      } catch (IOException e) {
+        System.err.println("HTTP request error: " + e.getMessage());
+      }
+        // dynamic content
+      if (path.equals("data.txt")) {
+        // send dynamic content
+        try {
+          server.reply(content);
+          return;
+        } catch (IOException e) {
+          System.err.println("HTTP dynamic reply error: " + e.getMessage());
+          continue;
+        }
+      }
+      // static content
+      if (path.equals("")) path = "webpage.html";
+      else if (!path.equals("favicon.ico") &&
+           !path.equals("apple-touch-icon.png") &&
+           !path.equals("script.js")) break;
+      // send file
+      File file = new File(root + File.separator + "sim"
+           + File.separator + path);
+      try {
+        server.reply(file);
+      } catch (IOException e) {
+        System.err.println("HTTP static reply error: " + e.getMessage());
+      }
+    }
   }
 }
