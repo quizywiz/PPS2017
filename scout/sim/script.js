@@ -47,10 +47,12 @@ function draw_dots(min_x, min_y, max_x, max_y, rows, cols, num, xcoords, ycoords
         //    min_y + ycoords[i] * (max_y - min_y) / rows );
         var locationx = min_x + xcoords[i] * (max_x - min_x) / cols + (max_x - min_x) / (4*cols)+ rand((max_x - min_x) / (2*cols));
         var locationy = min_y + ycoords[i] * (max_y - min_y) / rows+ (max_y - min_y) / (4*rows) + rand((max_y - min_y) / (2*rows));
+        var radius = 3;
+        if(rows > 50) radius = 1;
         ctx.arc(
             locationx, 
             locationy, 
-            3, 0, 2 * Math.PI);
+            radius, 0, 2 * Math.PI);
         ctx.fillStyle = color;
         ctx.fill();
         if(IDs != null) {
