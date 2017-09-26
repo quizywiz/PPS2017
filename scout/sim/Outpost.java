@@ -10,6 +10,7 @@ public class Outpost extends CellObject {
 
     public Outpost(int id, int n, int x, int y) {
         super("O" + id);
+        data = null;
         enemyMap = new ArrayList<>();
         for(int i = 0; i < n+2; ++i) {
             List<Integer> row = new ArrayList<>();;
@@ -20,9 +21,14 @@ public class Outpost extends CellObject {
         }
         location = new Point(x,y);
     }
+    
+    /**
+    * Store anything you want!
+    */
     public void setData(Object ob) {
         data = ob;
     }
+
     public Point getLocation() {
         return location;
     }
