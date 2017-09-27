@@ -30,7 +30,8 @@ abstract public class Player extends CellObject {
     *  Enemy IDs look like "E123" where 123 is some unique random number
     *  Landmark IDs look like "L123" where 123 is some unique numbering of landmarks
     *  Outpost IDs look like "O123" where 123 is some unique numbering of outposts
-    *       Outposts can only be at (0,0) or (0,n+1) or (n+1,0) or (n+1,n+1).
+    *       Outposts can only be at (0,0) or (0,n+1) or (n+1,0) or (n+1,n+1) on the board
+    *  If any position of the 3x3 grid is null, it is off the board, i.e. you are on the border.
     * @param concurrentObjects has the CellObjects on the (1,1) position of nearbyIds,
     *       i.e. the objects on the same cell. 
     *       The (x,y) coordinate of Landmarks can be retrieved using ((Landmark)object).getLocation();
@@ -46,10 +47,10 @@ abstract public class Player extends CellObject {
     /**
     * Called every turn as opposed to every 2/3/6/9 turns.
     * @param nearbyIds 3 x 3 grid of list of neighbouring IDs. 
-    * @param Scout IDs look like "S123" where 123 is some unique numbering of scouts
-    * @param Enemy IDs look like "E123" where 123 is some unique random number
-    * @param Landmark IDs look like "L123" where 123 is some unique numbering of landmarks
-    * @param Outpost IDs look like "O123" where 123 is some unique numbering of outposts
+    *  Scout IDs look like "S123" where 123 is some unique numbering of scouts
+    *  Enemy IDs look like "E123" where 123 is some unique random number
+    *  Landmark IDs look like "L123" where 123 is some unique numbering of landmarks
+    *  Outpost IDs look like "O123" where 123 is some unique numbering of outposts
     *  Outposts can only be at (0,0) or (0,n+1) or (n+1,0) or (n+1,n+1). 
     */
     public abstract void communicate(

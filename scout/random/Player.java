@@ -4,6 +4,8 @@ import scout.sim.*;
 
 import java.util.*;
 
+
+//Read scout.sim.Player for more information!
 public class Player extends scout.sim.Player {
     List<Point> enemyLocations;
     List<Point> safeLocations;
@@ -67,6 +69,7 @@ public class Player extends scout.sim.Player {
         for(CellObject obj : concurrentObjects) {
             if (obj instanceof Player) {
                 //communicate using custom methods?
+                ((Player) obj).stub();
             } else if (obj instanceof Enemy) {
 
             } else if (obj instanceof Landmark) {
@@ -111,8 +114,12 @@ public class Player extends scout.sim.Player {
         return new Point((gen.nextInt(3)) - 1, (gen.nextInt(3)) - 1);
     }
 
+    public void stub() {
+        ;
+    }
+
     @Override
     public void communicate(ArrayList<ArrayList<ArrayList<String>>> nearbyIds, List<CellObject> concurrentObjects) {
-
+        --t;
     }
 }

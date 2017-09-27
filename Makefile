@@ -1,12 +1,12 @@
-n=5
+n=15
 s=10
 e=20
 t=200
 repeats=1
 p=random
-m=dense_landmarks
+m=sparse_landmarks
 em=random_enemymap
-fps=200
+fps=5
 
 all: compile
 

@@ -39,14 +39,18 @@ function rand(n) {
     return Math.floor((Math.random() * n));
 }
 
-function draw_dots(min_x, min_y, max_x, max_y, rows, cols, num, xcoords, ycoords, color, IDs) {
+function draw_dots(min_x, min_y, max_x, max_y, rows, cols, num, xcoords, ycoords, color, IDs, isenemy) {
     var ctx = document.getElementById('canvas').getContext('2d');
     for(var i = 0 ; i < num ; ++ i) {
         ctx.beginPath();
         //ctx.moveTo(min_x + xcoords[i] * (max_x - min_x) / cols,
         //    min_y + ycoords[i] * (max_y - min_y) / rows );
-        var locationx = min_x + xcoords[i] * (max_x - min_x) / cols + (max_x - min_x) / (4*cols)+ rand((max_x - min_x) / (2*cols));
-        var locationy = min_y + ycoords[i] * (max_y - min_y) / rows+ (max_y - min_y) / (4*rows) + rand((max_y - min_y) / (2*rows));
+        var locationx = min_x + xcoords[i] * (max_x - min_x) / cols + (max_x - min_x) / (4*cols);
+        var locationy = min_y + ycoords[i] * (max_y - min_y) / rows+ (max_y - min_y) / (4*rows);
+        if(!isenemy) {
+            locationx +=  rand((max_x - min_x) / (2*cols));
+            locationy +=  rand((max_y - min_y) / (2*rows))
+        }
         var radius = 3;
         if(rows > 50) radius = 2;
         ctx.arc(
@@ -153,137 +157,6 @@ function draw_outpost(min_x, min_y, max_x, max_y, rows, cols) {
     ctx.fill();
 }
 
-function draw_shape(min_x, min_y, max_x, max_y, rows, cols, buildings, points, colors, types, highlight)
-{
-	var canvas = document.getElementById("canvas");
-	var ctx = canvas.getContext("2d");
-	if (min_x < 0 || max_x > canvas.width)
-		throw "Invalid x-axis bounds: " + min_x + " - " + max_x;
-	if (min_y < 0 || max_y > canvas.height)
-		throw "Invalid y-axis bounds: " + min_y + " - " + max_y;
-    // draw boxes
-    for (var i = 0 ; i != points.length ; ++i) {
-        var color = colors[types[i]];
-        var diagonals = highlight && (i + 1 == points.length);
-        var coord = points[i].split(",");
-        var row = parse_int(coord[0]);
-        var col = parse_int(coord[1]);
-        if (row < 0 || row >= rows)
-            throw "Invalid shape point row: " + row;
-        if (col < 0 || col >= cols)
-            throw "Invalid shape point col: " + col;
-        var x1 = min_x + (col + 0) * (max_x - min_x) / cols + 1;
-        var x2 = min_x + (col + 1) * (max_x - min_x) / cols - 1;
-        var y1 = min_y + (row + 0) * (max_y - min_y) / rows + 1;
-        var y2 = min_y + (row + 1) * (max_y - min_y) / rows - 1;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x1, y2);
-        ctx.lineTo(x2, y2);
-        ctx.lineTo(x2, y1);
-        ctx.closePath();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "black";
-        ctx.stroke();
-        if (color != null) {
-            ctx.fillStyle = color;
-            ctx.fill();
-        }
-        if (diagonals == true) {
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x1, y2);
-            ctx.lineTo(x2, y1);
-            ctx.stroke();
-        }
-    }
-
-    for(var i = 0; i != buildings.length; ++i) {
-        var building = buildings[i];
-        var color = colors[building.type];
-
-        //Convert tiles to acceptable format:
-        var tiles = [];
-        for(var tile_index in building.tiles) {
-            var coord = building.tiles[tile_index].split(",");
-            var row = parse_int(coord[0]);
-            var col = parse_int(coord[1]);
-
-            var x1 = min_x + (col + 0) * (max_x - min_x) / cols + 1;
-            var x2 = min_x + (col + 1) * (max_x - min_x) / cols - 1;
-            var y1 = min_y + (row + 0) * (max_y - min_y) / rows + 1;
-            var y2 = min_y + (row + 1) * (max_y - min_y) / rows - 1;
-            tiles.push({row: row, col: col, x1: x1, x2: x2, y1: y1, y2: y2});
-        }
-
-        //Draw tiles as normal
-        for(var tile_index in tiles) {
-            var tile = tiles[tile_index];
-            if (tile.row < 0 || tile.row >= rows)
-                throw "Invalid shape point row: " + tile.row;
-            if (tile.col < 0 || tile.col >= cols)
-                throw "Invalid shape point col: " + tile.col;
-            ctx.beginPath();
-            ctx.moveTo(tile.x1, tile.y1);
-            ctx.lineTo(tile.x1, tile.y2);
-            ctx.lineTo(tile.x2, tile.y2);
-            ctx.lineTo(tile.x2, tile.y1);
-            ctx.closePath();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = color;//"black";
-            ctx.stroke();
-            if (color != null) {
-                ctx.fillStyle = color;
-                ctx.fill();
-            }
-        }
-
-
-        //Collect all valid border points
-        var borders = [];
-        for(var x = 0; x != tiles.length; ++x) {
-            var topOccluded = false, bottomOccluded = false, leftOccluded = false, rightOccluded = false;
-            var tile = tiles[x];
-            for(var y = 0; y != tiles.length; ++y) {
-                var neighbor = tiles[y];
-                if(tile.row + 1 == neighbor.row && neighbor.col == tile.col)
-                    bottomOccluded = true;
-                if(tile.row - 1 == neighbor.row && neighbor.col == tile.col)
-                    topOccluded = true;
-                if(tile.row == neighbor.row && neighbor.col == tile.col + 1)
-                    rightOccluded = true;
-                if(tile.row == neighbor.row && neighbor.col == tile.col - 1)
-                    leftOccluded = true;
-            }
-
-            if(!rightOccluded)
-                borders.push({x1: tile.x2, x2: tile.x2, y1: tile.y1, y2: tile.y2});
-            if(!leftOccluded)
-                borders.push({x1: tile.x1, x2: tile.x1, y1: tile.y1, y2: tile.y2});
-            if(!topOccluded)
-                borders.push({x1: tile.x1, x2: tile.x2, y1: tile.y1, y2: tile.y1});
-            if(!bottomOccluded)
-                borders.push({x1: tile.x1, x2: tile.x2, y1: tile.y2, y2: tile.y2});
-        }
-
-        //Draw Borders
-        for(var border_index in borders) {
-            var border = borders[border_index];
-            ctx.beginPath();
-            ctx.moveTo(border.x1, border.y1);
-            ctx.lineTo(border.x2, border.y2);
-            ctx.closePath();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = "white";
-            ctx.stroke();
-        }
-
-    }
-}
-
 function draw_side(min_x, min_y, max_x, max_y, group, turns, colors)
 {
 	var canvas = document.getElementById("canvas");
@@ -306,28 +179,6 @@ function draw_side(min_x, min_y, max_x, max_y, group, turns, colors)
     ctx.fillText("Turns left: " + turns,         min_x, min_y + 60);
 }
 
-function parse_int(x)
-{
-	if (isNaN(parseFloat(x)) || !isFinite(x))
-		throw "Not a number: " + x;
-	var n = +x;
-	if (n != Math.round(n))
-		throw "Not an integer: " + n;
-	return Math.round(n);
-}
-
-function parse_points(data)
-{
-	if (data.length % 2 != 0)
-		throw "Invalid length: " + data.length;
-	var points = new Array(data.length / 2);
-	for (var i = 0 ; i != points.length ; ++i) {
-		var x = parse_int(data[i + i + 0]);
-		var y = parse_int(data[i + i + 1]);
-		points[i] = [x, y];
-	}
-	return points;
-}
 
 function process(data)
 {
@@ -378,8 +229,8 @@ function process(data)
     draw_outpost(300, 50, 900, 650, n+2, n+2);
     console.log("count: " + landmarkCount);
     draw_landmarks(300, 50, 900, 650, n+2, n+2, landmarkCount, landmarkx, landmarky, "limegreen")
-    draw_dots(300, 50, 900, 650, n+2, n+2, s, scoutx, scouty, "blue", scoutIDs);
-    draw_dots(300, 50, 900, 650, n+2, n+2, e, enemyx, enemyy, "red", null);
+    draw_dots(300, 50, 900, 650, n+2, n+2, e, enemyx, enemyy, "red", null, true);
+    draw_dots(300, 50, 900, 650, n+2, n+2, s, scoutx, scouty, "blue", scoutIDs, false);
     draw_side ( 10,  40,  190, 690, group, turns_left, colors);
     //draw_outpost(250, 50, 850, 650 , n+2, n+2);
     //draw_shape(250,  50,  850, 650, 50, 50, buildings, cuts, colors, types, highlight == 0);

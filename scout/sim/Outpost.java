@@ -38,12 +38,10 @@ public class Outpost extends CellObject {
     }
 
     public void addEnemyLocation(Point p) {
-        //System.out.println(p.x + " " + p.y + " has enemy set!");
         enemyMap.get(p.x).set(p.y, 1);
     }
 
     public void addSafeLocation(Point p) {
-        //System.out.println(p.x + " " + p.y + " has safe set!");
         enemyMap.get(p.x).set(p.y, 2);
     }
 
