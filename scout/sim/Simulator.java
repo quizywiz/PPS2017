@@ -14,7 +14,7 @@ import java.util.concurrent.*;
 public class Simulator {
   private static String group, landmark_mapper_name, enemy_mapper_name;
   private static String root = "scout";
-  private static long seed;
+  private static long seed=-1;
   private static int n, t, s, e, fps;
   private static long gui_refresh;
   private static boolean gui_enabled, log;
@@ -40,16 +40,19 @@ public class Simulator {
     timer.start();
     int total_score = 0;
     for(int r = 0 ; r < repeats; ++ r) {
-      seed = System.currentTimeMillis();
+      if(seed == -1)
+        seed = System.currentTimeMillis();
       Player[] scouts = new Player[s];
       for(int i = 0 ; i < s; ++ i) {
         scouts[i] = player_class.getDeclaredConstructor(int.class).newInstance(i);
       }
       LandmarkMapper landmarkMapper = landmark_mapper_class.newInstance();
       EnemyMapper enemyMapper = enemy_mapper_class.newInstance();
+      System.out.print(group + ", " + n +", " + s + ", " + e + ", " + t + ", " + landmark_mapper_name +
+       ", " + enemy_mapper_name + ", " );
       int score = new Simulator().play(n, t, s, e, timer, scouts, landmarkMapper, enemyMapper, seed);
       if(repeats == 1)
-        System.out.println("score: " + score);
+        System.out.println(score);
       total_score += score;
     }
     if(repeats != 1)
@@ -461,6 +464,10 @@ public class Simulator {
         }
       }
     }
+    for(int i = 0 ; i < 4; ++ i) {
+      System.out.print(enemies_discovered[i]+", "+safe_discovered[i]+ ", " + mistakes[i] +", ");
+    }
+    System.out.print(enemies_missed+", ");
     if(log) {
       for(int i = 0 ; i < 4; ++ i) {
         System.out.println("Enemies found by outpost "+i+": " + enemies_discovered[i]);
@@ -599,7 +606,7 @@ public class Simulator {
     if (class_modified < 0 || class_modified < last_modified(player_files) ||
             class_modified < last_modified(directory(root + sep + "sim", ".java"))) {
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-      System.out.println(System.getProperty( "java.home"));
+      //System.out.println(System.getProperty( "java.home"));
       if (compiler == null)
         throw new IOException("Cannot find Java compiler");
       StandardJavaFileManager manager = compiler.
@@ -610,7 +617,7 @@ public class Simulator {
       if (!compiler.getTask(null, manager, null, null, null,
               manager.getJavaFileObjectsFromFiles(player_files)).call())
         throw new IOException("Compilation failed");
-      System.err.println("done!");
+      //System.err.println("done!");
       class_file = new File(root + sep + group + sep + "Player.class");
       if (!class_file.exists())
         throw new FileNotFoundException("Missing class file");
