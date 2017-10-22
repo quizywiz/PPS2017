@@ -1,6 +1,6 @@
 from subprocess import call
-
-groups = ["g1", "g2", "g3", "g4", "g5","g6"]
+import sys
+groups = ["g5","g6"]
 landmarks = ["sparse_landmarks", "dense_landmarks"]
 
 # get rid of outputs. write all configs. Print the right stuff
@@ -10,26 +10,13 @@ smalln = [11,20]
 bign = [100]
 
 smallnt = ["50", "100", "150", "200", "250"]
-bignt = ["500", "1250", "2000", "2750"]
+bignt = ["500", "1250", "2000"]
 
 smallns = ["1","3","15"]
 bigns = ["1","3","16","25","100"]
 
 
 for g in xrange(6):
-	for n in smalln:
-		for s in smallns:
-			for lm in landmarks:
-				for mapp in em:
-					for enems in e:
-						for t in smallnt:
-							calledthing = ["java", "scout.sim.Simulator", "-p", groups[g], 
-							"-m", lm ,"-em", mapp, 
-							"-n", str(n), "-e", str((enems*n*n)/100), "-s", s, "-t", t, "-S", "20"]
-							#print calledthing,
-							call(calledthing)
-
-
 	for n in bign:
 		for s in bigns:
 			for lm in landmarks:
@@ -42,6 +29,20 @@ for g in xrange(6):
 							#print calledthing,
 							call(calledthing)
 
+sys.exit()
+for g in xrange(6):
+	for n in bign:
+		for s in bigns:
+			for lm in landmarks:
+				for mapp in em:
+					for enems in e:
+						for t in bignt:
+							calledthing = ["java", "scout.sim.Simulator", "-p", groups[g], 
+							"-m", lm ,"-em", mapp, 
+							"-n", str(n), "-e", str((enems*n*n)/100), "-s", s, "-t", t, "-S", "20"]
+							#print calledthing,
+
+for g in xrange(6):
 	calledthing = ["java", "scout.sim.Simulator", "-p", groups[g], "-m", "sparse_landmarks" ,"-em", "g1", 
 	"-n", "100", "-e", "100", "-s", "11", "-t", "500", "-S", "20"]
 	call(calledthing)
